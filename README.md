@@ -21,6 +21,7 @@
  - Supply voltage up to 9-25 Volts depends on the motor specs 
  - FTDI  header for programming
  - Any NEMA17 4-wire motor
+ - DIP components mostly used, suitable for DIY
   
    **Button Size Node Onboard sensors and features:**
  - Temperature and humidity sensor Si7021 
@@ -46,3 +47,6 @@
 ![enter image description here](https://github.com/EasySensors/BlindsActuatorNode/blob/master/photos/setPulley.JPG?raw=true)
 
 [**The board schematics Pdf link**](https://github.com/EasySensors/BlindsActuatorNode/blob/master/KiCad/blindsActuator.pdf)
+
+
+
