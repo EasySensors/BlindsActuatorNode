@@ -5,15 +5,11 @@
 
 ### The Blinds Actuator Node is actuator node for NEMA17 style steppers used in 3D printers. The board based on [The Button Size Node](https://github.com/EasySensors/ButtonSizeNode) with HopeRF RFM69-HCW radio on board and Pololu DRV8824/5 Stepper driver microcontroller (EBAN-DRV8824-5)
  
-
-
 [![Blinds Actuator Driver ButtonSizeNode + DRV8825](https://github.com/EasySensors/BlindsActuatorNode/blob/master/photos/youTube.jpg?raw=true)](https://youtu.be/Nq-V5lzM5DM)
 
   Best suitable for automating blinds. easyBlindsActuatorNode.ino  is the Arduino example sketch using [MySensors 2.0 ](https://www.mysensors.org/) API.  This is "work in progress" project although the code and the board are working nice. Will add some useful stuff like STL files for printing belt and pulley holders a bit later. 
 
-  
-------------------------------------------------------------------------
-
+  ------------------------------------------------------------------------
 
 ## Specification: ##
 
@@ -33,9 +29,6 @@
  - Dualoptiboot bootloader. Implements over the air (OTA) firmware update ability
  - RFM69-HCW (high power version) or CW (low power consumption version) 433 MHz Radio transceiver
  - The Digital and Analog pins are 3.3 volts
-
-
-
 
 ------------------------------------------------------
 
