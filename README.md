@@ -7,7 +7,7 @@
  
 [![Blinds Actuator Driver ButtonSizeNode + DRV8825](https://github.com/EasySensors/BlindsActuatorNode/blob/master/photos/youTube.jpg?raw=true)](https://youtu.be/Nq-V5lzM5DM)
 
-  Best suitable for automating blinds. easyBlindsActuatorNode.ino  is the Arduino example sketch using [MySensors 2.0 ](https://www.mysensors.org/) API.  This is "work in progress" project although the code and the board are working nice. Will add some useful stuff like STL files for printing belt and pulley holders a bit later. 
+  Best suitable for automating blinds. easyBlindsActuatorNode.ino  is the Arduino example sketch using [MySensors 2.0 ](https://www.mysensors.org/) API.  This is "work in progress" project although the code and the board work nice. Will add some useful stuff like STL files for printing belt and pulley holders a bit later. 
 
   ------------------------------------------------------------------------
 
