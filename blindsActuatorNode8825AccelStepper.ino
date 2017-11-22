@@ -22,7 +22,7 @@
 #define MY_DEBUG
 
 // Comment it out for Auto Node ID #
-#define MY_NODE_ID 0xAA 
+#define MY_NODE_ID 0xEE 
 // Avoid battery drain if Gateway disconnected and the node sends more than MY_TRANSPORT_STATE_RETRIES times message.
 #define MY_TRANSPORT_UPLINK_CHECK_DISABLED
 #define MY_PARENT_NODE_IS_STATIC
@@ -30,12 +30,16 @@
 
 // Enable and select radio type attached
 #define MY_RADIO_RFM69
-#define MY_RFM69_FREQUENCY   RF69_433MHZ
 #define MY_IS_RFM69HW
+#define MY_RFM69_FREQUENCY RF69_433MHZ
+
+//#define MY_RFM69_FREQUENCY   RFM69_868MHZ
+
+#define MY_RFM69_NEW_DRIVER
 
 //Enable OTA feature
-#define MY_OTA_FIRMWARE_FEATURE
-#define MY_OTA_FLASH_JDECID 0 //0x2020
+//#define MY_OTA_FIRMWARE_FEATURE
+//#define MY_OTA_FLASH_JDECID 0 //0x2020
 
 //Enable Crypto Authentication to secure the node
 //#define MY_SIGNING_ATSHA204
@@ -50,8 +54,8 @@
 #include <MySensors.h>
 #include <stdlib.h>
 
-#define percentage 5 
-#define calibrationButton 6 
+#define percentage 1 
+#define calibrationButton 2 
 
 #define LEDpin 4
 
@@ -92,6 +96,7 @@ long calibrationOpenedPosition = 0, calibrationClosedPosition = 0, calibrationCu
 // http://playground.arduino.cc/Code/EEPROMWriteAnything
 template <class T> int EEPROM_writeAnything(int ee, const T& value)
 {
+  //return 1;
     const byte* p = (const byte*)(const void*)&value;
     unsigned int i;
     for (i = 0; i < sizeof(value); i++)  
@@ -101,6 +106,7 @@ template <class T> int EEPROM_writeAnything(int ee, const T& value)
 
 template <class T> int EEPROM_readAnything(int ee, T& value)
 {
+  //return 1;
     byte* p = (byte*)(void*)&value;
     unsigned int i;
     for (i = 0; i < sizeof(value); i++)
@@ -151,11 +157,12 @@ void before() {
 
     // read stored actuator Position values if calibrated before
     EEPROM_readAnything(240,calibrationString);
+Serial.println("Read calibrationString"); Serial.println(calibrationString);
 
     if (strcmp(calibrationString, calibrated) == 0){
       EEPROM_readAnything(200,calibrationOpenedPosition);
       EEPROM_readAnything(204,calibrationClosedPosition);
-      EEPROM_readAnything(208,calibrationCurrentPosition);
+      EEPROM_readAnything(210,calibrationCurrentPosition);
       stepper.setCurrentPosition(calibrationCurrentPosition);
     }
 Serial.println("Read calibrationClosedPosition"); Serial.println(calibrationClosedPosition);
@@ -178,20 +185,24 @@ void presentation() {
 }
 
 
-void openPressed(){ //revolutions is the number of rotations for motor. 0 is full open
+void openPressed(){
   digitalWrite(LEDpin,1); 
   stepper.enableOutputs(); // energize coils
   if ((bool)loadState(calibrationButton)) {
-    //stepper.runToNewPosition(stepper.currentPosition() + stepsToRotateWhileCalibrating);
-    //calibrationOpenedPosition = stepper.currentPosition();
     calibrationOpenedPosition = stepper.currentPosition() + stepsToRotateWhileCalibrating;
     stepper.moveTo(calibrationOpenedPosition);
     stepper.setSpeed(motorMaxSpeed);
     } 
-    else if (stepper.distanceToGo() != 0) stepper.moveTo(stepper.currentPosition());
+    else if (stepper.distanceToGo() != 0){
+      stepper.moveTo(stepper.currentPosition());
+      EEPROM_writeAnything(210,stepper.currentPosition());
+      Serial.println("Read calibrationCurrentPosition"); Serial.println(stepper.currentPosition());
+    }
     else {
       stepper.moveTo(calibrationOpenedPosition);
       stepper.setSpeed(motorMaxSpeed);
+      EEPROM_writeAnything(210,calibrationOpenedPosition);
+      Serial.println("Read calibrationCurrentPosition"); Serial.println(stepper.currentPosition());
       }
 }
 
@@ -205,10 +216,16 @@ void closePressed(){ // revolutions is the number of rotations for motor. 0 is f
     stepper.moveTo(calibrationClosedPosition);
     stepper.setSpeed(motorMaxSpeed);
     } 
-    else if (stepper.distanceToGo() != 0) stepper.moveTo(stepper.currentPosition());
+    else if (stepper.distanceToGo() != 0) {
+      stepper.moveTo(stepper.currentPosition());
+      EEPROM_writeAnything(210,stepper.currentPosition());
+      Serial.println("Read calibrationCurrentPosition"); Serial.println(stepper.currentPosition());
+    }
     else {
       stepper.moveTo(calibrationClosedPosition);
       stepper.setSpeed(motorMaxSpeed);
+      EEPROM_writeAnything(210,calibrationClosedPosition);
+      Serial.println("Read calibrationCurrentPosition"); Serial.println(stepper.currentPosition());
       }
 }
 
@@ -219,7 +236,7 @@ void calibrationPressed(int buttonValue){
   if (buttonValue == 0){//calibration process finished - button is off
       EEPROM_writeAnything(200,calibrationOpenedPosition);
       EEPROM_writeAnything(204,calibrationClosedPosition);
-      EEPROM_writeAnything(208,stepper.currentPosition());
+      EEPROM_writeAnything(210,stepper.currentPosition());
       EEPROM_writeAnything(240,calibrated);
       digitalWrite(LEDpin,0); 
     } else       calibrationStartedMillis = millis();
@@ -233,7 +250,6 @@ Serial.println("Read calibrationCurrentPosition"); Serial.println(stepper.curren
 static uint8_t   lastValueSw3 = HIGH, lastValueSw1 = HIGH, lastValueSw2 = HIGH;
 
 void loop(){
-
   wdt_reset();
 
   debouncerSw3.update();
@@ -273,8 +289,6 @@ void loop(){
     digitalWrite(LEDpin,!digitalRead(LEDpin));    
   }
 
-  stepper.runSpeedToPosition(); 
-  //stepper.run(); 
 
   // Disable Calibration mode after 1 minute since it keeps coils energized
   // Check if we reach the max millis of 4,294,967,295
@@ -289,8 +303,10 @@ void loop(){
   if (stepper.distanceToGo() == 0 && !(bool)loadState(calibrationButton)) {
     stepper.disableOutputs(); // deenergize coils
     digitalWrite(LEDpin,0); 
-    EEPROM_writeAnything(208,stepper.currentPosition());
   }
+
+  if (stepper.distanceToGo() != 0) stepper.runSpeedToPosition();   //stepper.run(); 
+
 }
 
 
